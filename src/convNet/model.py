@@ -1,11 +1,14 @@
+from typing import Tuple, Union
 import math
 import torch
 import torch.nn as nn
+import numpy as np
 
 # Compute padding
-def compute_padding_size(image_width, stride, filter_size):
-    return math.ceil(
-        ((image_width - 1) * stride + filter_size - (stride * image_width)) / 2
+def compute_padding_size(image_dim: int, stride: int, filter_size: int) -> int:
+    """Compute the padding size given an input image of image_dim x image_dim, a stride and a filter size"""
+    return int(
+        math.ceil(((image_dim - 1) * stride + filter_size - (stride * image_dim)) / 2)
     )
 
 
@@ -13,16 +16,18 @@ def compute_padding_size(image_width, stride, filter_size):
 class convolutional_block(nn.Module):
     def __init__(
         self,
-        input_channels,
-        output_channels,
-        kernel_size,
-        stride,
-        padding,
-        # maxpool_padding,
-        maxpool_stride=2,
-        maxpool_poolsize=3,
-        use_batchnorm=False,
+        input_channels: int,
+        output_channels: int,
+        kernel_size: int,
+        stride: int,
+        padding: int,
+        maxpool_stride: int = 2,
+        maxpool_poolsize: int = 3,
+        use_batchnorm: bool = False,
     ):
+        """
+        Instantiate a convnet neural network
+        """
         super(convolutional_block, self).__init__()
         # Set up layers
         self.conv1 = nn.Conv2d(
@@ -58,7 +63,7 @@ class convolutional_block(nn.Module):
             self.batchnorm2 = nn.BatchNorm2d(output_channels)
             self.batchnorm3 = nn.BatchNorm2d(output_channels)
 
-    def forward(self, X, **kwargs):
+    def forward(self, X: Union[torch.tensor, np.array], **kwargs) -> torch.tensor:
         x = torch.relu(self.conv1(X))
         if self._use_batchnorm:
             x = self.batchnorm1(x)
@@ -75,24 +80,26 @@ class convolutional_block(nn.Module):
 
 
 class convNet(nn.Module):
-    def __init__(self, img_dim, dense_units, dropout=0.3):
+    def __init__(
+        self, img_dim: Tuple[int, int], dense_units: int, dropout: float = 0.3
+    ):
         super(convNet, self).__init__()
         # Set up convolutional blocks
         self.conv_block_1 = convolutional_block(
             3, 32, 3, 1, padding=compute_padding_size(img_dim[0], 1, 3)
         )
         self.conv_block_2 = convolutional_block(
-            32, 64, 3, 1, padding=compute_padding_size(img_dim[0] / 2, 1, 3)
+            32, 64, 3, 1, padding=compute_padding_size(int(img_dim[0] / 2), 1, 3)
         )
         self.conv_block_3 = convolutional_block(
-            64, 128, 3, 1, padding=compute_padding_size(img_dim[0] / 4, 1, 3)
+            64, 128, 3, 1, padding=compute_padding_size(int(img_dim[0] / 4), 1, 3)
         )
         self.conv_block_4 = convolutional_block(
             128,
             256,
             3,
             2,
-            padding=compute_padding_size(img_dim[0] / 8, 2, 3),
+            padding=compute_padding_size(int(img_dim[0] / 8), 2, 3),
             use_batchnorm=True,
         )
         # Global max pool
@@ -108,7 +115,7 @@ class convNet(nn.Module):
         # Output layer
         self.class_prediction = nn.Linear(128, 1)
 
-    def forward(self, X):
+    def forward(self, X: Union[torch.tensor, np.array]) -> torch.tensor:
         x = self.conv_block_1(X)
         x = self.conv_block_2(x)
         x = self.conv_block_3(x)
