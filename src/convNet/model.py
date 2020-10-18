@@ -25,9 +25,6 @@ class convolutional_block(nn.Module):
         maxpool_poolsize: int = 3,
         use_batchnorm: bool = False,
     ):
-        """
-        Instantiate a convnet neural network
-        """
         super(convolutional_block, self).__init__()
         # Set up layers
         self.conv1 = nn.Conv2d(
