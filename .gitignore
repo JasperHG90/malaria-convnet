@@ -1,0 +1,21 @@
+# Python
+__pycache__
+*.pyc
+.eggs/
+*.egg-info
+
+# Pycharm
+.idea/
+
+# Mypy
+.mypy_cache
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+test-coverage.xml
+test-output.xml
+build/
+dist/
