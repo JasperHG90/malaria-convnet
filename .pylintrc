@@ -1,0 +1,2 @@
+[MASTER]
+disable=import-error,missing-docstring,invalid-name,bad-continuation,unused-variable,redefined-outer-name,unused-variable,locally-disabled,too-few-public-methods,too-many-instance-attributes,too-many-arguments

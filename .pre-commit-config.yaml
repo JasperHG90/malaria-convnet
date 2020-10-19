@@ -19,17 +19,3 @@ repos:
     hooks:
       - id: flake8
       - id: check-merge-conflict
-
-  - repo: https://github.com/PyCQA/bandit
-    rev: master
-    hooks:
-        - id: bandit
-#
-#  - repo: https://github.com/godatadriven/pre-commit-docker-pyspark
-#    rev: jasper-spark3
-#    hooks:
-#      - id: pyspark-docker
-#        name: Run tests
-#        entry: /entrypoint.sh python setup.py test
-#        language: docker
-#        pass_filenames: false

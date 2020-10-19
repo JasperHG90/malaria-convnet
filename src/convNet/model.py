@@ -4,15 +4,15 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-# Compute padding
+
 def compute_padding_size(image_dim: int, stride: int, filter_size: int) -> int:
-    """Compute the padding size given an input image of image_dim x image_dim, a stride and a filter size"""
+    """Compute the padding size given an input image of image_dim x image_dim,
+        a stride and a filter size"""
     return int(
         math.ceil(((image_dim - 1) * stride + filter_size - (stride * image_dim)) / 2)
     )
 
 
-# Convolutional block
 class convolutional_block(nn.Module):
     def __init__(
         self,
@@ -49,18 +49,18 @@ class convolutional_block(nn.Module):
             stride=stride ** 2,
             padding=0,
         )
-        # Maxpooling layer
+        # Max pooling layer
         self.maxpool = nn.MaxPool2d(
             kernel_size=maxpool_poolsize, stride=maxpool_stride, padding=padding
         )
-        # If batchnorm
+        # If batch norm
         self._use_batchnorm = use_batchnorm
         if use_batchnorm:
             self.batchnorm1 = nn.BatchNorm2d(output_channels)
             self.batchnorm2 = nn.BatchNorm2d(output_channels)
             self.batchnorm3 = nn.BatchNorm2d(output_channels)
 
-    def forward(self, X: Union[torch.tensor, np.array], **kwargs) -> torch.tensor:
+    def forward(self, X: Union[torch.tensor, np.array]) -> torch.tensor:
         x = torch.relu(self.conv1(X))
         if self._use_batchnorm:
             x = self.batchnorm1(x)
@@ -99,15 +99,10 @@ class convNet(nn.Module):
             padding=compute_padding_size(int(img_dim[0] / 8), 2, 3),
             use_batchnorm=True,
         )
-        # Global max pool
         self.global_max_pool = nn.MaxPool2d(kernel_size=1, stride=2, padding=0)
-        # Flatten layer
         self.flatten = nn.Flatten()
-        # Dense layer
         self.dense = nn.Linear(256, dense_units)
-        # Dropout layer
         self.dropout = nn.Dropout(dropout)
-        # Batch norm
         self.batchnorm = nn.BatchNorm1d(dense_units)
         # Output layer
         self.class_prediction = nn.Linear(128, 1)
