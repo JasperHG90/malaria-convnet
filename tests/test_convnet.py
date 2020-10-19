@@ -14,8 +14,8 @@ def test_compute_padding_size():
     assert D1 == D2  # noseq
     # Try with larger stride
     P = compute_padding_size(D1, 3, 5)
-    D2 = output_dim(D1, 5, P, 2)
-    assert (D1 / 2) == D2  # noseq
+    D2 = output_dim(D1, 5, P, 3)
+    assert D1 == D2  # noseq
 
 
 def test_convNet():
@@ -23,3 +23,8 @@ def test_convNet():
     CN = convNet(img_dim=(128, 128), dense_units=128, dropout=0.4)
     layers = [layer for layer in CN.named_modules()]
     assert len(layers) == 30  # noseq
+    assert layers[-1][0] == "class_prediction"
+    assert layers[10][0] == "conv_block_2.maxpool"
+    assert layers[12][1].out_channels == 128
+    assert layers[18][1].in_channels == 256
+    assert layers[18][1].out_channels == 256

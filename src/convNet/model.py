@@ -8,9 +8,7 @@ import numpy as np
 def compute_padding_size(image_dim: int, stride: int, filter_size: int) -> int:
     """Compute the padding size given an input image of image_dim x image_dim,
         a stride and a filter size"""
-    return int(
-        math.ceil(((image_dim - 1) * stride + filter_size - (stride * image_dim)) / 2)
-    )
+    return int(math.ceil(((image_dim - 1) * stride + filter_size - image_dim) / 2))
 
 
 class convolutional_block(nn.Module):
