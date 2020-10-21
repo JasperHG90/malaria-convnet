@@ -1,4 +1,4 @@
-from src.convNet.model import compute_padding_size, convNet
+from src.convNet.model import compute_padding_size, convNet, inception_block
 
 
 def test_compute_padding_size():
@@ -16,6 +16,11 @@ def test_compute_padding_size():
     P = compute_padding_size(D1, 3, 5)
     D2 = output_dim(D1, 5, P, 3)
     assert D1 == D2  # noseq
+
+
+def test_inception_block():
+    """Test inception block"""
+    IB = inception_block(128, 3, 64)
 
 
 def test_convNet():
