@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from src.convNet.utils import log_qtiming
+from src.convNet.utils import log_timing
 
 logging.basicConfig(level=logging.INFO)
 
