@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, Union
+from typing import Union
 import math
 import torch
 import torch.nn as nn
@@ -16,23 +16,43 @@ def compute_padding_size(image_dim: int, kernel_size: int, stride: int) -> int:
     return int(math.ceil(((image_dim - 1) * stride + kernel_size - image_dim) / 2))
 
 
-def compute_layer_size(image_dim: int, kernel_size: int, stride: int, padding: int=0) -> int:
-    return int(math.floor(((image_dim - kernel_size + 2*padding) / stride) + 1))
+def compute_layer_size(
+    image_dim: int, kernel_size: int, stride: int, padding: int = 0
+) -> int:
+    return int(math.floor(((image_dim - kernel_size + 2 * padding) / stride) + 1))
 
 
 class convolutional_block(nn.Module):
-    def __init__(self, input_channels: int, output_channels: int, kernel_size: int, padding: str="valid", **kwargs) -> None:
+    def __init__(
+        self,
+        input_channels: int,
+        output_channels: int,
+        kernel_size: int,
+        padding: str = "valid",
+        **kwargs: int
+    ) -> None:
         if padding not in ["valid", "same"]:
             raise ValueError("Arg. 'padding' must be one of 'valid' or 'same'")
         if padding == "same":
             if not kwargs.get("image_dim"):
-                raise KeyError("If padding set to 'same', you must also pass keyword arg. 'image_dim'")
-            self.padding = compute_padding_size(image_dim=kwargs.get("image_dim"), stride=1, kernel_size=kernel_size)
+                raise KeyError(
+                    "If padding set to 'same', you must also pass keyword arg. 'image_dim'"
+                )
+            self.padding = compute_padding_size(
+                image_dim=int(kwargs.get("image_dim")),  # type: ignore
+                stride=1,
+                kernel_size=kernel_size,
+            )
         else:
             self.padding = 0
         super(convolutional_block, self).__init__()
         self.kernel_size = kernel_size
-        self.conv = nn.Conv2d(in_channels=input_channels, out_channels=output_channels, kernel_size=kernel_size, padding=self.padding)
+        self.conv = nn.Conv2d(
+            in_channels=input_channels,
+            out_channels=output_channels,
+            kernel_size=kernel_size,
+            padding=self.padding,
+        )
         self.pool = nn.MaxPool2d(3, 2, padding=1)
 
     def forward(self, x: Union[torch.tensor, np.array]) -> torch.tensor:
@@ -57,27 +77,57 @@ class convNet(nn.Module):
     def forward(self, x: Union[torch.tensor, np.array]) -> torch.tensor:
         x = self.conv_block_1(x)
         # Log
-        layer_size_conv1 = compute_layer_size(32, self.conv_block_1.kernel_size, 1, self.conv_block_1.padding)
-        logging.debug(self.conv_block_1._get_name() + ": size after convolution is %s" % layer_size_conv1)
+        layer_size_conv1 = compute_layer_size(
+            32, self.conv_block_1.kernel_size, 1, self.conv_block_1.padding
+        )
+        logging.debug(
+            self.conv_block_1._get_name()  # pylint: disable=protected-access
+            + ": size after convolution is %s" % layer_size_conv1
+        )
         layer_size_maxpool1 = compute_layer_size(layer_size_conv1, 3, 2, 1)
-        logging.debug(self.conv_block_1._get_name() + ": size after maxpool is %s" % layer_size_maxpool1)
+        logging.debug(
+            self.conv_block_1._get_name()  # pylint: disable=protected-access
+            + ": size after maxpool is %s" % layer_size_maxpool1
+        )
 
         x = self.conv_block_2(x)
         # Log
-        layer_size_conv2 = compute_layer_size(layer_size_maxpool1, self.conv_block_2.kernel_size, 1, self.conv_block_2.padding)
-        logging.debug(self.conv_block_2._get_name() + ": size after convolution is %s" % layer_size_conv2)
+        layer_size_conv2 = compute_layer_size(
+            layer_size_maxpool1,
+            self.conv_block_2.kernel_size,
+            1,
+            self.conv_block_2.padding,
+        )
+        logging.debug(
+            self.conv_block_2._get_name()  # pylint: disable=protected-access
+            + ": size after convolution is %s" % layer_size_conv2
+        )
         layer_size_maxpool2 = compute_layer_size(layer_size_conv2, 3, 2, 1)
-        logging.debug(self.conv_block_2._get_name() + ": size after maxpool is %s" % layer_size_maxpool2)
+        logging.debug(
+            self.conv_block_2._get_name()  # pylint: disable=protected-access
+            + ": size after maxpool is %s" % layer_size_maxpool2
+        )
 
         x = self.conv_block_3(x)
         # Log
-        layer_size_conv3 = compute_layer_size(layer_size_maxpool2, self.conv_block_3.kernel_size, 1, self.conv_block_3.padding)
-        logging.debug(self.conv_block_3._get_name() + ": size after convolution is %s" % layer_size_conv3)
+        layer_size_conv3 = compute_layer_size(
+            layer_size_maxpool2,
+            self.conv_block_3.kernel_size,
+            1,
+            self.conv_block_3.padding,
+        )
+        logging.debug(
+            self.conv_block_3._get_name()  # pylint: disable=protected-access
+            + ": size after convolution is %s" % layer_size_conv3
+        )
         layer_size_maxpool3 = compute_layer_size(layer_size_conv3, 3, 2, 1)
-        logging.debug(self.conv_block_3._get_name() + ": size after maxpool is %s" % layer_size_maxpool3)
+        logging.debug(
+            self.conv_block_3._get_name()  # pylint: disable=protected-access
+            + ": size after maxpool is %s" % layer_size_maxpool3
+        )
 
         x = self.flatten(x)
-        logging.debug(self._get_name() + ": size after flattening is %s" % (2 * 2 * 32))
+        logging.debug("%s: size after flattening is %s", self._get_name(), (2 * 2 * 32))
 
         x = self.dropout(x)
         x = F.relu(self.dense1(x))
