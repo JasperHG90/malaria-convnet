@@ -2,11 +2,11 @@
 
 import logging
 
-logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
 H = W = 32
 
 from src.convNet.model import convolutional_block, convNet
+from src.convNet.utils import log_timing
 from torchsummary import summary
 
 net = convolutional_block(

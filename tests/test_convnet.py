@@ -1,11 +1,7 @@
 import math
-from src.convNet.model import compute_padding_size, convNet, convolutional_block
+from src.convNet.model import compute_padding_size, compute_layer_size, convNet, convolutional_block
 import torch
 import pytest
-
-
-def compute_layer_size(image_dim: int, kernel_size: int, stride: int, padding: int=0) -> int:
-    return int(math.floor(((image_dim - kernel_size + 2*padding) / stride) + 1))
 
 
 def test_compute_padding_size():
@@ -49,5 +45,4 @@ def test_convNet():
     x = torch.rand(2, 3, 32, 32)
     x = CN(x)
     assert tuple(x.shape) == (2, 1)
-
 
