@@ -1,35 +1,47 @@
-from src.convNet.model import compute_padding_size, convNet, inception_block
+import math
+from src.convNet.model import compute_padding_size, convNet, convolutional_block
+import torch
+
+
+def compute_layer_size(image_dim: int, kernel_size: int, stride: int, padding: int=0) -> int:
+    return int(math.floor(((image_dim - kernel_size + 2*padding) / stride) + 1))
 
 
 def test_compute_padding_size():
     """Test computing padding size"""
 
-    def output_dim(input_dim, filter_size, padding, stride):
-        return int(((input_dim - filter_size + 2 * padding) / stride) + 1)
-
-    D1 = 128
-    P = compute_padding_size(D1, 1, 5)
+    D1 = 32
+    P = compute_padding_size(D1, 5, 1)
     # Compute output size
-    D2 = output_dim(D1, 5, P, 1)
+    D2 = compute_layer_size(D1, 5, 1, P)
     assert D1 == D2  # noseq
     # Try with larger stride
-    P = compute_padding_size(D1, 3, 5)
-    D2 = output_dim(D1, 5, P, 3)
+    P = compute_padding_size(D1, 5, 2)
+    D2 = compute_layer_size(D1, 5, 2, P)
     assert D1 == D2  # noseq
 
 
-def test_inception_block():
+def test_convolutional_block():
     """Test inception block"""
-    IB = inception_block(128, 3, 64)
+    CB = convolutional_block(3, 6, 5, "valid")
+    # Compute layer sizes
+    size_after_conv2d = compute_layer_size(32, 5, 1, 0)
+    assert size_after_conv2d == 28
+    size_after_maxpool = compute_layer_size(28, 3, 2, 1)
+    assert size_after_maxpool == 14
+    # Make tensor
+    x = torch.rand(2, 3, 32, 32)
+    x = CB(x)
+    # Shape should be 2, 6, 14, 14
+    assert tuple(x.shape) == (2, 6, 14, 14)
+    # Test padding = "same"
+    CB = convolutional_block(3, 6, 5, "same")
+    x = torch.rand(2, 3, 32, 32)
+    x = CB(x)
+    assert tuple(x.shape) == (2, 6, 16, 16)
+
 
 
 def test_convNet():
     """Test convNet implementation"""
-    CN = convNet(img_dim=(128, 128), dense_units=128, dropout=0.4)
-    layers = [layer for layer in CN.named_modules()]
-    assert len(layers) == 30  # noseq
-    assert layers[-1][0] == "class_prediction"
-    assert layers[10][0] == "conv_block_2.maxpool"
-    assert layers[12][1].out_channels == 128
-    assert layers[18][1].in_channels == 256
-    assert layers[18][1].out_channels == 256
+    CN = convNet(dropout=0.3)
