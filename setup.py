@@ -11,7 +11,7 @@ setup(
     author_email="jasperginn@gmail.com",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    install_requires=["pytorch>=1.6,<1.7", "numpy>=1.10"],
+    install_requires=["pytorch==1.6", "numpy>=1.10"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-nunit", "pytest-cov"],
     extras_require={"develop": ["pre-commit", "bump2version"]},
