@@ -1,11 +1,8 @@
-import os
 from setuptools import setup, find_packages
-
-BUILD_ID = os.environ.get("BUILD_BUILDID", "0")
 
 setup(
     name="convNet",
-    version="0.1" + "." + BUILD_ID,
+    version="0.1.1",
     # Author details
     author="Jasper Ginn",
     author_email="jasperginn@gmail.com",
